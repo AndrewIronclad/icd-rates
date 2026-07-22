@@ -1,0 +1,25 @@
+{
+  "ratesAsOf": "July 17, 2026",
+  "metals": {
+    "steel": { "note": "" },
+    "aluminum": { "note": "" },
+    "copper": { "note": "Copper input materials (ores, concentrates, cathodes, anodes) and scrap are currently outside Section 232 — these rates apply to semi-finished copper and copper-intensive derivatives." }
+  },
+  "tiers": {
+    "article":    { "rate": 0.50, "label": "Metal article (Annex I-A)" },
+    "derivative": { "rate": 0.25, "label": "Derivative product (Annex I-B)" },
+    "equipment":  { "rate": 0.15, "label": "Industrial / ag / HVAC equipment (transitional, thru 2027)" }
+  },
+  "section301": {
+    "rate": 0.25,
+    "note": "Section 301 stacks on top of Section 232 for Chinese-origin goods. 25% is typical for steel/aluminum products; your exact rate depends on 301 list placement."
+  },
+  "countries": {
+    "standard":  { "note": "" },
+    "tradedeal": { "cap": 0.15, "note": "Trade-deal partners (EU, UK, Japan, Korea, Taiwan, etc.) are generally capped at a 15% total duty outcome." },
+    "uk":        { "override": { "article": 0.25, "derivative": 0.15, "equipment": 0.15 }, "note": "UK-origin metal qualifies for reduced rates under the Economic Prosperity Deal, pending ongoing talks." },
+    "usmca":     { "usContentApplies": true, "note": "For USMCA-qualifying goods, duty applies only to non-U.S. content. Minimum-rate rules may raise the effective outcome — confirm with your broker." },
+    "australia": { "exempt": true, "note": "Australia is currently exempt from Section 232 steel/aluminum duties." },
+    "russia":    { "aluminumRate": 2.00, "note": "Aluminum of Russian origin (or smelted/cast in Russia) carries a 200% ad valorem duty." }
+  }
+}
