@@ -6,7 +6,7 @@
     "copper": { "note": "Copper input materials (ores, concentrates, cathodes, anodes) and scrap are currently outside Section 232 — these rates apply to semi-finished copper and copper-intensive derivatives." }
   },
   "tiers": {
-    "article":    { "rate": 0.50, "label": "Metal article (Annex I-A)" },
+    "article":    { "rate": 0.90, "label": "Metal article (Annex I-A)" },
     "derivative": { "rate": 0.25, "label": "Derivative product (Annex I-B)" },
     "equipment":  { "rate": 0.15, "label": "Industrial / ag / HVAC equipment (transitional, thru 2027)" }
   },
