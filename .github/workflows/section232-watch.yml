@@ -1,0 +1,77 @@
+# Section 232 watch
+# Checks the Federal Register every weekday morning for new documents that
+# mention "Section 232" and steel/aluminum/copper, and opens a GitHub issue
+# for each one it hasn't seen before.
+#
+# Setup: save this file at .github/workflows/section232-watch.yml in the
+# same repo as rates.json. Then set the repo to Watch -> All activity so
+# new issues email you. No secrets required — it uses the built-in token.
+
+name: Section 232 watch
+
+on:
+  schedule:
+    - cron: "30 14 * * 1-5"   # 8:30am Central (weekdays); FR publishes by ~7:45am CT
+  workflow_dispatch: {}        # lets you run it manually from the Actions tab
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  check-federal-register:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Query Federal Register and open issues for new documents
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          # Look back 2 days so nothing slips through weekend/holiday gaps.
+          # Duplicate alerts are prevented by the issue-title check below.
+          SINCE=$(date -u -d "2 days ago" +%Y-%m-%d)
+
+          QS="per_page=20&order=newest"
+          QS="$QS&conditions%5Bterm%5D=%22Section%20232%22"
+          QS="$QS&conditions%5Bpublication_date%5D%5Bgte%5D=$SINCE"
+          for f in document_number title type abstract html_url publication_date; do
+            QS="$QS&fields%5B%5D=$f"
+          done
+
+          curl -sf "https://www.federalregister.gov/api/v1/documents.json?$QS" -o results.json
+
+          # Keep only metal-related hits (edit this regex to widen/narrow scope)
+          MATCHES=$(jq -r '.results // [] | .[]
+            | select(((.title // "") + " " + (.abstract // "")) | test("steel|alumin|copper"; "i"))
+            | [.document_number, .publication_date, .type, .title, .html_url] | @tsv' results.json)
+
+          if [ -z "$MATCHES" ]; then
+            echo "No new metal-related Section 232 documents since $SINCE."
+            exit 0
+          fi
+
+          while IFS=$'\t' read -r num pub type title url; do
+            # Skip if we already opened an issue for this document number
+            EXISTING=$(gh issue list --search "$num in:title" --state all --json number --jq 'length')
+            if [ "$EXISTING" != "0" ]; then
+              echo "Already tracked: $num"
+              continue
+            fi
+
+            cat > body.md <<EOF
+          **$title**
+
+          - Published: $pub
+          - Type: $type
+          - Link: $url
+
+          Review the document. If rates or coverage changed, edit \`rates.json\`
+          (numbers + \`ratesAsOf\` date) and commit — the landing-page calculator
+          picks it up automatically within a few minutes.
+          EOF
+
+            gh issue create --title "FR $num — $title" --body-file body.md
+            echo "Opened issue for $num"
+          done <<< "$MATCHES"
